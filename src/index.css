@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+:root {
+  --dp-bg: #111113;
+  --dp-surface: #18181b;
+  --dp-border: #27272a;
+  --dp-border-hover: #3f3f46;
+  --dp-text: #f4f4f5;
+  --dp-muted: #a1a1aa;
+  --dp-hint: #71717a;
+  --dp-green: #10b981;
+  --dp-amber: #f59e0b;
+  --dp-blue: #3b82f6;
+  --dp-purple: #8b5cf6;
+  --dp-coral: #ef4444;
+  --border-radius-md: 0.375rem;
+  --border-radius-lg: 0.5rem;
+}
+
+body {
+  background-color: var(--dp-bg);
+  color: var(--dp-text);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--dp-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--dp-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--dp-border-hover);
+}
+
+/* Base resets */
+a { text-decoration: none; color: inherit; }
+button { background: none; border: none; cursor: pointer; color: inherit; font-family: inherit; }
+
+@theme {
+  --color-dp-bg: var(--dp-bg);
+  --color-dp-surface: var(--dp-surface);
+  --color-dp-border: var(--dp-border);
+  --color-dp-border-hover: var(--dp-border-hover);
+  --color-dp-text: var(--dp-text);
+  --color-dp-muted: var(--dp-muted);
+  --color-dp-hint: var(--dp-hint);
+  --color-dp-green: var(--dp-green);
+  --color-dp-amber: var(--dp-amber);
+  --color-dp-blue: var(--dp-blue);
+  --color-dp-purple: var(--dp-purple);
+  --color-dp-coral: var(--dp-coral);
+}
