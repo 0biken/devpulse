@@ -3,7 +3,7 @@ import { sanitize } from '../utils/sanitize';
 import { TABS } from '../constants/tabs';
 import { IconStar, IconStarFilled } from '@tabler/icons-react';
 
-export function FeedCard({ item, tabId, isSeen, isBookmarked, onSeen, onBookmark }) {
+export function FeedCard({ item, tabId, isSeen, isBookmarked, isFocused, onSeen, onBookmark }) {
   const tab = TABS.find(t => t.id === tabId);
 
   const ref = useIntersectionObserver(() => {
@@ -20,8 +20,10 @@ export function FeedCard({ item, tabId, isSeen, isBookmarked, onSeen, onBookmark
         if (!item.url) e.preventDefault();
         onSeen(item.id);
       }}
-      className={`block relative p-3.5 mb-2 bg-[var(--dp-surface)] border border-[var(--dp-border)] rounded-lg border-l-2 transition-all duration-200 group hover:border-[var(--dp-border-hover)] ${
-        isSeen ? 'opacity-70 saturate-50' : 'hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20'
+      className={`block relative p-3.5 mb-2 bg-[var(--dp-surface)] border rounded-lg border-l-2 transition-all duration-200 group ${
+        isFocused ? 'ring-2 ring-[var(--dp-text)] border-[var(--dp-border-hover)]' : 'border-[var(--dp-border)] hover:border-[var(--dp-border-hover)]'
+      } ${
+        isSeen && !isFocused ? 'opacity-70 saturate-50' : 'hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20'
       }`}
       style={{ borderLeftColor: tab.color }}
     >

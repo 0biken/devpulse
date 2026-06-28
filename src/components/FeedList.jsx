@@ -1,8 +1,9 @@
 import { FeedCard } from './FeedCard';
 import { Skeleton, ErrorState, EmptyState } from './States';
+import { AdSlot } from './AdSlot';
 import { useFeed } from '../hooks/useFeed';
 
-export function FeedList({ tabId, feeds, dispatch, seen, bookmarks, onSeen, onBookmark }) {
+export function FeedList({ tabId, feeds, dispatch, seen, bookmarks, onSeen, onBookmark, focusedIndex }) {
   useFeed(tabId, dispatch);
   
   const feed = feeds[tabId];
@@ -28,17 +29,26 @@ export function FeedList({ tabId, feeds, dispatch, seen, bookmarks, onSeen, onBo
 
   return (
     <div className="p-2 flex flex-col overflow-y-auto" style={{ height: 'calc(100vh - 120px)' }}>
-      {feed.items.map(item => (
-        <FeedCard
-          key={item.id}
-          item={item}
-          tabId={tabId}
-          isSeen={!!seen[item.id]}
-          isBookmarked={bookmarks.some(b => b.id === item.id)}
-          onSeen={onSeen}
-          onBookmark={onBookmark}
-        />
-      ))}
+      {feed.items.map((item, i) => {
+        const isFocused = i === focusedIndex;
+        // Inject an AdSlot after every 5th item
+        const showAd = (i + 1) % 5 === 0;
+
+        return (
+          <div key={item.id} id={`feed-item-${i}`}>
+            <FeedCard
+              item={item}
+              tabId={tabId}
+              isSeen={!!seen[item.id]}
+              isBookmarked={bookmarks.some(b => b.id === item.id)}
+              isFocused={isFocused}
+              onSeen={onSeen}
+              onBookmark={onBookmark}
+            />
+            {showAd && <AdSlot id={`ad-slot-${i}`} />}
+          </div>
+        );
+      })}
     </div>
   );
 }
