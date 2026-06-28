@@ -48,7 +48,8 @@ button { background: none; border: none; cursor: pointer; color: inherit; font-f
 }
 
 .animate-ticker {
-  animation: ticker 30s linear infinite;
+  animation: ticker 90s linear infinite;
+  will-change: transform;
 }
 
 @theme {
