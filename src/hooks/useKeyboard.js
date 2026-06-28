@@ -1,8 +1,14 @@
 import { useEffect } from 'react';
 
-export function useKeyboard({ onNext, onPrev, onOpen, onBookmark, onRefresh, onTabSwitch, onHelp }) {
+export function useKeyboard({ onNext, onPrev, onOpen, onBookmark, onRefresh, onTabSwitch, onHelp, onSearchToggle }) {
   useEffect(() => {
     function handler(e) {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        onSearchToggle?.();
+        return;
+      }
+
       if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
 
       switch (e.key) {
@@ -19,5 +25,5 @@ export function useKeyboard({ onNext, onPrev, onOpen, onBookmark, onRefresh, onT
     }
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [onNext, onPrev, onOpen, onBookmark, onRefresh, onTabSwitch, onHelp]);
+  }, [onNext, onPrev, onOpen, onBookmark, onRefresh, onTabSwitch, onHelp, onSearchToggle]);
 }

@@ -5,6 +5,7 @@ import { TabBar } from './components/TabBar';
 import { FeedList } from './components/FeedList';
 import { Footer } from './components/Footer';
 import { KeyboardHelp } from './components/KeyboardHelp';
+import { SearchPalette } from './components/SearchPalette';
 import { useTimer } from './hooks/useTimer';
 import { usePersistence } from './hooks/usePersistence';
 import { useKeyboard } from './hooks/useKeyboard';
@@ -34,15 +35,31 @@ export default function App() {
   const [feeds, dispatch] = useReducer(feedReducer, initialState);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTag, setActiveTag] = useState('');
   const { seen, bookmarks, markSeen, toggleBookmark } = usePersistence();
   const { elapsed, isRunning } = useTimer();
 
-  // Reset focus when tab changes
+  // Reset focus and filters when tab changes
   useEffect(() => {
     setFocusedIndex(-1);
+    setSearchQuery('');
+    setActiveTag('');
   }, [activeTab]);
 
   const activeFeed = feeds[activeTab]?.items || [];
+
+  const filteredFeed = activeFeed.filter(item => {
+    if (activeTag && !item.tags?.includes(activeTag)) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const matchTitle = item.title?.toLowerCase().includes(q);
+      const matchDesc = item.description?.toLowerCase().includes(q);
+      if (!matchTitle && !matchDesc) return false;
+    }
+    return true;
+  });
 
   const scrollToFocused = (idx) => {
     const el = document.getElementById(`feed-item-${idx}`);
@@ -52,16 +69,17 @@ export default function App() {
   };
 
   useKeyboard({
+    onSearchToggle: () => setIsSearchOpen(prev => !prev),
     onNext: () => {
-      if (activeFeed.length === 0) return;
+      if (filteredFeed.length === 0) return;
       setFocusedIndex(prev => {
-        const next = Math.min(prev + 1, activeFeed.length - 1);
+        const next = Math.min(prev + 1, filteredFeed.length - 1);
         scrollToFocused(next);
         return next;
       });
     },
     onPrev: () => {
-      if (activeFeed.length === 0) return;
+      if (filteredFeed.length === 0) return;
       setFocusedIndex(prev => {
         const next = Math.max(prev - 1, 0);
         scrollToFocused(next);
@@ -69,8 +87,8 @@ export default function App() {
       });
     },
     onOpen: () => {
-      if (focusedIndex >= 0 && activeFeed[focusedIndex]) {
-        const item = activeFeed[focusedIndex];
+      if (focusedIndex >= 0 && filteredFeed[focusedIndex]) {
+        const item = filteredFeed[focusedIndex];
         if (item.url) {
           window.open(item.url, '_blank');
           markSeen(item.id);
@@ -78,8 +96,8 @@ export default function App() {
       }
     },
     onBookmark: () => {
-      if (focusedIndex >= 0 && activeFeed[focusedIndex]) {
-        toggleBookmark(activeFeed[focusedIndex]);
+      if (focusedIndex >= 0 && filteredFeed[focusedIndex]) {
+        toggleBookmark(filteredFeed[focusedIndex]);
       }
     },
     onRefresh: () => dispatch({ type: 'CLEAR', tabId: activeTab }),
@@ -101,18 +119,32 @@ export default function App() {
         <FeedList
           tabId={activeTab}
           feeds={feeds}
+          filteredItems={filteredFeed}
           dispatch={dispatch}
           seen={seen}
           bookmarks={bookmarks}
           onSeen={markSeen}
           onBookmark={toggleBookmark}
           focusedIndex={focusedIndex}
+          searchQuery={searchQuery}
+          activeTag={activeTag}
+          onTagClick={setActiveTag}
+          onClearFilters={() => {
+            setSearchQuery('');
+            setActiveTag('');
+          }}
         />
       </main>
       
       <Footer tabId={activeTab} feeds={feeds} dispatch={dispatch} />
       
       <KeyboardHelp isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+      <SearchPalette 
+        isOpen={isSearchOpen} 
+        onClose={() => setIsSearchOpen(false)} 
+        query={searchQuery} 
+        setQuery={setSearchQuery} 
+      />
     </div>
   );
 }

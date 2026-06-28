@@ -3,7 +3,7 @@ import { sanitize } from '../utils/sanitize';
 import { TABS } from '../constants/tabs';
 import { IconStar, IconStarFilled } from '@tabler/icons-react';
 
-export function FeedCard({ item, tabId, isSeen, isBookmarked, isFocused, onSeen, onBookmark }) {
+export function FeedCard({ item, tabId, isSeen, isBookmarked, isFocused, onSeen, onBookmark, onTagClick }) {
   const tab = TABS.find(t => t.id === tabId);
 
   const ref = useIntersectionObserver(() => {
@@ -67,9 +67,17 @@ export function FeedCard({ item, tabId, isSeen, isBookmarked, isFocused, onSeen,
       {item.tags?.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mt-2.5">
           {item.tags.slice(0, 4).map(t => (
-            <span key={t} className="text-[10px] text-[var(--dp-hint)] bg-[var(--dp-bg)] px-2 py-0.5 rounded-full border border-[var(--dp-border)]">
+            <button 
+              key={t} 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (onTagClick) onTagClick(t);
+              }}
+              className="text-[10px] text-[var(--dp-hint)] hover:text-[var(--dp-text)] hover:border-[var(--dp-border-hover)] transition-colors bg-[var(--dp-bg)] px-2 py-0.5 rounded-full border border-[var(--dp-border)]"
+            >
               #{t}
-            </span>
+            </button>
           ))}
         </div>
       )}
