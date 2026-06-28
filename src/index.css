@@ -42,6 +42,15 @@ body {
 a { text-decoration: none; color: inherit; }
 button { background: none; border: none; cursor: pointer; color: inherit; font-family: inherit; }
 
+@keyframes ticker {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+.animate-ticker {
+  animation: ticker 30s linear infinite;
+}
+
 @theme {
   --color-dp-bg: var(--dp-bg);
   --color-dp-surface: var(--dp-surface);

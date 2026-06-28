@@ -1,15 +1,25 @@
 import { timeAgo } from '../utils/timeAgo';
 
-// Mock generator for News and Learn
-const generateMockData = (tabId) => {
-  return Array.from({ length: 12 }).map((_, i) => ({
-    id: `${tabId}-${i}`,
-    title: `Mock ${tabId.toUpperCase()} Title ${i + 1}`,
-    url: `https://example.com/${tabId}/${i}`,
-    badge: tabId,
-    stat: tabId === 'github' ? `★ ${Math.floor(Math.random() * 10000)}` : `▲ ${Math.floor(Math.random() * 500)}`,
-    meta: ['100 comments', '2h ago', 'user123'],
-    tags: [tabId, 'mock', 'data']
+// Generate mock Tech Tips
+const generateTechTips = () => {
+  const tips = [
+    "Use CSS 'content-visibility: auto' to skip rendering off-screen elements and boost performance.",
+    "In React, wrap expensive functional component calculations in 'useMemo' to prevent unnecessary recalculations.",
+    "Git Tip: Use 'git commit --amend' to fix the last commit message instead of creating a new one.",
+    "When using Tailwind CSS, use '@apply' sparingly to keep your utility-first approach scalable.",
+    "Vite tip: Add 'splitVendorChunkPlugin()' to separate vendor dependencies and improve caching.",
+    "JavaScript Tip: Use 'Promise.allSettled' instead of 'Promise.all' when you don't want one rejection to fail everything.",
+    "Use 'console.table()' to format an array of objects into a clean, readable table in your browser devtools.",
+    "Accessibility: Always provide 'alt' attributes for images, even if empty (alt=\"\"), to help screen readers."
+  ];
+
+  return tips.map((tip, i) => ({
+    id: `tip-${i}`,
+    title: tip,
+    badge: 'Tech Tip',
+    stat: '💡',
+    meta: ['Gemini AI'],
+    tags: ['tip', 'productivity', 'learning']
   }));
 };
 
@@ -66,6 +76,7 @@ async function fetchGitHub() {
   return (data.items || []).map(r => ({
     id: `gh-${r.id}`,
     title: r.full_name,
+    description: r.description,
     url: r.html_url,
     badge: r.language || 'GitHub',
     stat: `★ ${(r.stargazers_count || 0).toLocaleString()}`,
@@ -100,10 +111,9 @@ export async function fetchTab(tabId) {
       case 'devto': return await fetchDevTo();
       case 'github': return await fetchGitHub();
       case 'jobs': return await fetchJobs();
-      case 'news':
-      case 'learn':
-        // Kept mocked for now per user request
-        return await new Promise(resolve => setTimeout(() => resolve(generateMockData(tabId)), 600));
+      case 'techtips':
+        // Return hardcoded tips until Gemini API is connected
+        return await new Promise(resolve => setTimeout(() => resolve(generateTechTips()), 400));
       default:
         throw new Error(`Unknown tab ID: ${tabId}`);
     }

@@ -40,6 +40,11 @@ export function FeedCard({ item, tabId, isSeen, isBookmarked, isFocused, onSeen,
           <h3 className="text-[13px] font-medium leading-relaxed text-[var(--dp-text)] group-hover:text-blue-400 transition-colors">
             {sanitize(item.title)}
           </h3>
+          {item.description && (
+            <p className="text-[11px] text-[var(--dp-muted)] mt-1.5 leading-snug line-clamp-2">
+              {sanitize(item.description)}
+            </p>
+          )}
         </div>
         
         {item.stat && (
