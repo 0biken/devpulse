@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import { sanitize } from '../utils/sanitize';
 import { TABS } from '../constants/tabs';
-import { IconStar, IconStarFilled, IconSparkles } from '@tabler/icons-react';
+import { IconStar, IconStarFilled, IconSparkles, IconCode } from '@tabler/icons-react';
 import { summarizeArticle } from '../api/gemini';
 
-export function FeedCard({ item, tabId, isSeen, isBookmarked, isFocused, onSeen, onBookmark, onTagClick }) {
+export function FeedCard({ item, tabId, isSeen, isBookmarked, isFocused, onSeen, onBookmark, onTagClick, onOpenInEditor }) {
   const tab = TABS.find(t => t.id === tabId);
   const [summary, setSummary] = useState(null);
   const [isSummarizing, setIsSummarizing] = useState(false);
@@ -124,6 +124,20 @@ export function FeedCard({ item, tabId, isSeen, isBookmarked, isFocused, onSeen,
       )}
 
       <div className="absolute bottom-3 right-3 flex items-center gap-3 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+        <button
+          onClick={(e) => {
+             e.preventDefault();
+             e.stopPropagation();
+             const isTip = tabId === 'techtips';
+             const content = isTip 
+               ? `// Tip: ${item.title}\n\n// Try it out below:\n` 
+               : `# ${item.title}\n\n${item.description || ''}\n\n[Link](${item.url || ''})\n`;
+             onOpenInEditor(content, isTip ? 'js' : 'md');
+          }}
+          className="text-[10px] flex items-center gap-1 font-medium bg-[var(--dp-border)] hover:bg-[var(--dp-border-hover)] text-[var(--dp-text)] px-2 py-1 rounded transition-colors"
+        >
+          <IconCode size={12} className="text-[var(--dp-blue)]" /> Editor
+        </button>
         <button
           onClick={handleSummarize}
           disabled={isSummarizing || summary}

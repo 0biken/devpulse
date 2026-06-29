@@ -5,7 +5,7 @@ import { useFeed } from '../hooks/useFeed';
 
 import { IconX } from '@tabler/icons-react';
 
-export function FeedList({ tabId, feeds, filteredItems, dispatch, seen, bookmarks, onSeen, onBookmark, focusedIndex, searchQuery, activeTag, onTagClick, onClearFilters }) {
+export function FeedList({ tabId, feeds, filteredItems, dispatch, seen, bookmarks, onSeen, onBookmark, focusedIndex, searchQuery, activeTag, onTagClick, onClearFilters, onOpenInEditor }) {
   useFeed(tabId, dispatch);
   
   const feed = feeds[tabId];
@@ -32,7 +32,7 @@ export function FeedList({ tabId, feeds, filteredItems, dispatch, seen, bookmark
   const hasFilters = searchQuery || activeTag;
 
   return (
-    <div className="p-2 flex flex-col overflow-y-auto" style={{ height: 'calc(100vh - 120px)' }}>
+    <div className="p-2 flex flex-col h-full overflow-y-auto min-h-0">
       {hasFilters && (
         <div className="flex items-center justify-between mb-3 px-3 py-2 bg-[var(--dp-border)] rounded-md text-sm text-[var(--dp-text)]">
           <div className="flex items-center gap-2">
@@ -66,6 +66,7 @@ export function FeedList({ tabId, feeds, filteredItems, dispatch, seen, bookmark
                 onSeen={onSeen}
                 onBookmark={onBookmark}
                 onTagClick={onTagClick}
+                onOpenInEditor={onOpenInEditor}
               />
               {showAd && <AdSlot id={`ad-slot-${i}`} />}
             </div>

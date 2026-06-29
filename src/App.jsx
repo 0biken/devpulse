@@ -7,9 +7,11 @@ import { Footer } from './components/Footer';
 import { KeyboardHelp } from './components/KeyboardHelp';
 import { SearchPalette } from './components/SearchPalette';
 import { SettingsModal } from './components/SettingsModal';
+import { EditorPane } from './components/EditorPane';
 import { useTimer } from './hooks/useTimer';
 import { usePersistence } from './hooks/usePersistence';
 import { useKeyboard } from './hooks/useKeyboard';
+import { useFileSystem } from './hooks/useFileSystem';
 import { TABS } from './constants/tabs';
 
 const initialState = {};
@@ -42,6 +44,7 @@ export default function App() {
   const [activeTag, setActiveTag] = useState('');
   const { seen, bookmarks, markSeen, toggleBookmark } = usePersistence();
   const { elapsed, isRunning } = useTimer();
+  const fs = useFileSystem();
 
   // Reset focus and filters when tab changes
   useEffect(() => {
@@ -115,30 +118,45 @@ export default function App() {
     <div id="dp-root" className="flex flex-col h-screen bg-[var(--dp-bg)] text-[var(--dp-text)] font-sans antialiased overflow-hidden selection:bg-[var(--dp-green)] selection:text-white relative">
       <Header elapsed={elapsed} isRunning={isRunning} onSettingsClick={() => setIsSettingsOpen(true)} />
       <Ticker feeds={feeds} />
-      <TabBar tabs={TABS} active={activeTab} onSwitch={setActiveTab} feeds={feeds} />
       
-      <main className="flex-1 overflow-hidden relative">
-        <FeedList
-          tabId={activeTab}
-          feeds={feeds}
-          filteredItems={filteredFeed}
-          dispatch={dispatch}
-          seen={seen}
-          bookmarks={bookmarks}
-          onSeen={markSeen}
-          onBookmark={toggleBookmark}
-          focusedIndex={focusedIndex}
-          searchQuery={searchQuery}
-          activeTag={activeTag}
-          onTagClick={setActiveTag}
-          onClearFilters={() => {
-            setSearchQuery('');
-            setActiveTag('');
-          }}
-        />
-      </main>
-      
-      <Footer tabId={activeTab} feeds={feeds} dispatch={dispatch} />
+      <div className="flex flex-1 overflow-hidden min-h-0">
+        {/* Left Pane: Feed Dashboard */}
+        <div className="w-[450px] flex-shrink-0 flex flex-col border-r border-[var(--dp-border)]">
+          <TabBar tabs={TABS} active={activeTab} onSwitch={setActiveTab} feeds={feeds} />
+          
+          <main className="flex-1 overflow-hidden relative min-h-0">
+            <FeedList
+              tabId={activeTab}
+              feeds={feeds}
+              filteredItems={filteredFeed}
+              dispatch={dispatch}
+              seen={seen}
+              bookmarks={bookmarks}
+              onSeen={markSeen}
+              onBookmark={toggleBookmark}
+              focusedIndex={focusedIndex}
+              searchQuery={searchQuery}
+              activeTag={activeTag}
+              onTagClick={setActiveTag}
+              onClearFilters={() => {
+                setSearchQuery('');
+                setActiveTag('');
+              }}
+              onOpenInEditor={(content, ext) => {
+                const title = content.split('\n')[0].replace(/[^a-zA-Z0-9]/g, '_').substring(0, 15) || 'snippet';
+                fs.createFile(`snippet_${title}.${ext}`, content);
+              }}
+            />
+          </main>
+          
+          <Footer tabId={activeTab} feeds={feeds} dispatch={dispatch} />
+        </div>
+
+        {/* Right Pane: Editor Workspace */}
+        <div className="flex-1 flex min-w-0">
+          <EditorPane fs={fs} />
+        </div>
+      </div>
       
       <KeyboardHelp isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
       <SearchPalette 
