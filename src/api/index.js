@@ -1,7 +1,8 @@
 import { timeAgo } from '../utils/timeAgo';
+import { generateTechTips } from './gemini';
 
 // Generate mock Tech Tips
-const generateTechTips = () => {
+const generateMockTechTips = () => {
   const tips = [
     "Use CSS 'content-visibility: auto' to skip rendering off-screen elements and boost performance.",
     "In React, wrap expensive functional component calculations in 'useMemo' to prevent unnecessary recalculations.",
@@ -111,9 +112,18 @@ export async function fetchTab(tabId) {
       case 'devto': return await fetchDevTo();
       case 'github': return await fetchGitHub();
       case 'jobs': return await fetchJobs();
-      case 'techtips':
-        // Return hardcoded tips until Gemini API is connected
-        return await new Promise(resolve => setTimeout(() => resolve(generateTechTips()), 400));
+      case 'techtips': {
+        const apiKey = localStorage.getItem('devpulse_gemini_key');
+        if (apiKey) {
+          try {
+            return await generateTechTips(apiKey);
+          } catch (e) {
+            console.error('[DevPulse] Gemini API failed, falling back to mock:', e);
+            // Fallback to mock if API fails
+          }
+        }
+        return await new Promise(resolve => setTimeout(() => resolve(generateMockTechTips()), 400));
+      }
       default:
         throw new Error(`Unknown tab ID: ${tabId}`);
     }

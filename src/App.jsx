@@ -6,6 +6,7 @@ import { FeedList } from './components/FeedList';
 import { Footer } from './components/Footer';
 import { KeyboardHelp } from './components/KeyboardHelp';
 import { SearchPalette } from './components/SearchPalette';
+import { SettingsModal } from './components/SettingsModal';
 import { useTimer } from './hooks/useTimer';
 import { usePersistence } from './hooks/usePersistence';
 import { useKeyboard } from './hooks/useKeyboard';
@@ -36,6 +37,7 @@ export default function App() {
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTag, setActiveTag] = useState('');
   const { seen, bookmarks, markSeen, toggleBookmark } = usePersistence();
@@ -111,7 +113,7 @@ export default function App() {
 
   return (
     <div id="dp-root" className="flex flex-col h-screen bg-[var(--dp-bg)] text-[var(--dp-text)] font-sans antialiased overflow-hidden selection:bg-[var(--dp-green)] selection:text-white relative">
-      <Header elapsed={elapsed} isRunning={isRunning} />
+      <Header elapsed={elapsed} isRunning={isRunning} onSettingsClick={() => setIsSettingsOpen(true)} />
       <Ticker feeds={feeds} />
       <TabBar tabs={TABS} active={activeTab} onSwitch={setActiveTab} feeds={feeds} />
       
@@ -144,6 +146,10 @@ export default function App() {
         onClose={() => setIsSearchOpen(false)} 
         query={searchQuery} 
         setQuery={setSearchQuery} 
+      />
+      <SettingsModal 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
       />
     </div>
   );

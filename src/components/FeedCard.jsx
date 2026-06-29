@@ -1,14 +1,41 @@
+import { useState } from 'react';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import { sanitize } from '../utils/sanitize';
 import { TABS } from '../constants/tabs';
-import { IconStar, IconStarFilled } from '@tabler/icons-react';
+import { IconStar, IconStarFilled, IconSparkles } from '@tabler/icons-react';
+import { summarizeArticle } from '../api/gemini';
 
 export function FeedCard({ item, tabId, isSeen, isBookmarked, isFocused, onSeen, onBookmark, onTagClick }) {
   const tab = TABS.find(t => t.id === tabId);
+  const [summary, setSummary] = useState(null);
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [summaryError, setSummaryError] = useState('');
 
   const ref = useIntersectionObserver(() => {
     setTimeout(() => onSeen(item.id), 2000);
   });
+
+  const handleSummarize = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const apiKey = localStorage.getItem('devpulse_gemini_key');
+    if (!apiKey) {
+      setSummaryError('Please add a Gemini API key in Settings first.');
+      return;
+    }
+
+    setIsSummarizing(true);
+    setSummaryError('');
+    try {
+      const result = await summarizeArticle(apiKey, item.title, item.url || '');
+      setSummary(result);
+    } catch (err) {
+      setSummaryError(err.message || 'Failed to summarize');
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
 
   return (
     <a
@@ -82,17 +109,40 @@ export function FeedCard({ item, tabId, isSeen, isBookmarked, isFocused, onSeen,
         </div>
       )}
 
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onBookmark(item);
-        }}
-        className="absolute bottom-3 right-3 text-[var(--dp-hint)] hover:text-yellow-500 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
-        aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark'}
-      >
-        {isBookmarked ? <IconStarFilled size={16} className="text-yellow-500" /> : <IconStar size={16} />}
-      </button>
+      {summaryError && (
+        <div className="mt-3 text-[11px] text-[var(--dp-coral)]" onClick={(e) => e.preventDefault()}>
+          {summaryError}
+        </div>
+      )}
+      
+      {summary && (
+        <div className="mt-3 p-3 bg-[#131315] border border-[var(--dp-border)] rounded-md text-[12px] text-[var(--dp-muted)] leading-relaxed relative overflow-hidden group/summary" onClick={(e) => e.preventDefault()}>
+          <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-[var(--dp-amber)] to-[var(--dp-purple)]" />
+          <h4 className="text-[var(--dp-text)] font-medium mb-2 flex items-center gap-1.5"><IconSparkles size={14} className="text-[var(--dp-amber)]" /> AI Summary</h4>
+          <div className="whitespace-pre-line">{summary}</div>
+        </div>
+      )}
+
+      <div className="absolute bottom-3 right-3 flex items-center gap-3 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+        <button
+          onClick={handleSummarize}
+          disabled={isSummarizing || summary}
+          className="text-[10px] flex items-center gap-1 font-medium bg-[var(--dp-border)] hover:bg-[var(--dp-border-hover)] text-[var(--dp-text)] px-2 py-1 rounded transition-colors disabled:opacity-50"
+        >
+          {isSummarizing ? <span className="animate-pulse">✨ thinking...</span> : summary ? '✨ Summarized' : <><IconSparkles size={12} className="text-[var(--dp-amber)]" /> Summarize</>}
+        </button>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onBookmark(item);
+          }}
+          className="text-[var(--dp-hint)] hover:text-yellow-500 transition-colors"
+          aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark'}
+        >
+          {isBookmarked ? <IconStarFilled size={16} className="text-yellow-500" /> : <IconStar size={16} />}
+        </button>
+      </div>
       
       {isBookmarked && (
         <div className="absolute top-3 right-3 opacity-100 group-hover:opacity-0 transition-opacity">
